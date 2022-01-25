@@ -29,38 +29,20 @@ impl FromStr for Command {
     }
 }
 
-struct Submarine {
-    moves: Vec<Command>,
-    position: (i64, i64),
-}
-
-impl Submarine {
-    pub fn new(moves: Vec<Command>) -> Self {
-        Submarine {
-            moves,
-            position: (0, 0),
-        }
-    }
-
-    pub fn calculate_final_position(&mut self) -> Result<(i64, i64)> {
-        // TODO: Change that, it's shitty solution
-        let moves = self.moves.clone();
-        moves.iter().for_each(|command| self.apply_command(command));
-        Ok(self.position)
-    }
-
-    fn apply_command(&mut self, command: &Command) {
-        match command {
+impl Command {
+    pub fn apply(&self, mut position: (i64, i64)) -> (i64, i64) {
+        match self {
             Command::Forward(x) => {
-                self.position.0 = self.position.0 + *x as i64;
+                position.0 = position.0 + *x as i64;
             }
             Command::Up(x) => {
-                self.position.1 = self.position.1 - *x as i64;
+                position.1 = position.1 - *x as i64;
             }
             Command::Down(x) => {
-                self.position.1 = self.position.1 + *x as i64;
+                position.1 = position.1 + *x as i64;
             }
         };
+        position
     }
 }
 
@@ -72,12 +54,21 @@ fn read_input(reader: impl BufRead) -> Result<Vec<Command>> {
     Ok(data)
 }
 
+fn solution_1(input: Vec<Command>) -> i64 {
+    let mut position: (i64, i64) = (0, 0);
+    input.iter().for_each(|command| position = command.apply(position));
+
+    position.0 * position.1
+
+}
+
 fn main() -> Result<()> {
     let file = File::open("day02/input.txt")?;
     let reader = BufReader::new(file);
     let data = read_input(reader)?;
 
-    let result_1 = Submarine::new(data).calculate_final_position()?;
-    println!("Part 1 solution: {}", result_1.0 * result_1.1);
+    let result_1 = solution_1(data);
+    println!("Solution for part 1: {}", result_1);
+    assert_eq!(result_1, 2036120);
     Ok(())
 }
